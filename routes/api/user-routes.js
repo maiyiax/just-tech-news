@@ -52,7 +52,7 @@ router.get('/:id', (req, res) => {
 
 
 // ================================================================================================================================================= //
-//| Inserts a user, equivalent to SQL 'INSERT INTO users (username, email, password) VALUES ("Lernantino", "lernantino@gmail.com", "password1234")' |//
+//| Creates a user, equivalent to SQL 'INSERT INTO users (username, email, password) VALUES ("Lernantino", "lernantino@gmail.com", "password1234")' |//
 // ================================================================================================================================================= //
 
 // POST /api/users
@@ -70,6 +70,31 @@ router.post('/', (req, res) => {
         });
 });
 
+// this route will be found at http://localhost:3001/api/users/login
+router.post('/login', (req, res) => {
+// expects {email: 'lernantino@gmail.com', password: 'password1234'}
+    User.findOne({
+        where: {
+            email: req.body.email
+        }
+    }).then(dbUserData => {
+        if (!dbUserData) {
+            // error 400 = client error, invalid request
+            res.status(400).json({ message: 'No user with that email address!' });
+            return;
+        }
+
+        //Verify User
+        const validPassword = dbUserData.checkPassword(req.body.password);
+        if (!validPassword) {
+            res.status(400).json({ message: 'Incorrect password!' });
+            return;
+        }
+
+        res.json({ user: dbUserData, message: 'You are now logged in!' })
+    })
+
+})
 
 // ================================================================================================================================================================= //
 //| updates existing data, equivalent to SQL 'UPDATE users SET username = "Lernantino", email = "lernantino@gmail.com", password = "newPassword1234" WHERE id = 1;' |//
