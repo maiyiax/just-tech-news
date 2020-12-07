@@ -1,7 +1,7 @@
 //  create five routes that will work with the User model to perform CRUD operations.
 
 const router = require('express').Router();
-const { User } = require('../../models');
+const { User, Post, Vote } = require('../../models');
 
 // ========================================================================================================================================= //
 //| when the client makes a GET request to /api/users, we will select all users from the user table in the database and send it back as JSON |//
@@ -33,7 +33,19 @@ router.get('/:id', (req, res) => {
         attributes: { exclude: ['password'] },
         where: {
             id: req.params.id
-        }
+        },
+        include: [
+            {
+                model: Post,
+                attributes: ['id', 'title', 'post_url', 'created_at']
+            },
+            {
+                model: Post,
+                attributes: ['title'],
+                through: Vote,
+                as: 'voted_posts'
+            }
+        ]
     })
         .then(dbUserData => {
             if (!dbUserData) {
