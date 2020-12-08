@@ -1,0 +1,22 @@
+<!-- Your file/folder structure MUST be set up this way for Handlebars.js to work correctly. You will always have a main layout located at (and named) views/layouts/main.handlebars. All other template files will go directly in the views folder (views/welcome.handlebars). -->
+
+<ol class="post-list">
+    <!-- Note the use of {{#each}} to begin the loop and {{/each}} to define where it ends. Any HTML code in between (e.g., the <li> element) will be repeated for every item in posts -->
+
+    {{#each posts as |post|}} 
+    <li>
+        <article class="post">
+            <div class="title">
+                <a href="{{post_url}}" target="_blank">{{title}}</a>
+                <span>({{post_url}})</span>
+            </div>
+            <div class="meta">
+                {{vote_count}} point(s) by {{user.username}} on
+                {{created_at}}
+                |
+                <a href="/post{{id}}">{{comments.length}} comment(s)</a>
+            </div>
+        </article>
+    </li>
+    {{/each}}
+</ol>
