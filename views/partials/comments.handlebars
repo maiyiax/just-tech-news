@@ -1,0 +1,13 @@
+<div class="comments">
+    <!-- In Handlebars.js, we can use the trusty keyword this to refer to the parent object or array that's available in the context of the partial -->
+    {{#each this}}
+    <section class="comment">
+        <div class="meta">
+            {{user.username}} on {{created_at}}
+        </div>
+        <div class="text">
+            {{comment_text}}
+        </div>
+    </section>
+    {{/each}}
+</div>
