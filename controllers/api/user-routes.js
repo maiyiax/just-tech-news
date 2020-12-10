@@ -1,7 +1,7 @@
 //  create five routes that will work with the User model to perform CRUD operations.
 
 const router = require('express').Router();
-const { User, Post, Vote } = require('../../models');
+const { User, Post, Vote, Comment } = require('../../models');
 
 // ========================================================================================================================================= //
 //| when the client makes a GET request to /api/users, we will select all users from the user table in the database and send it back as JSON |//
@@ -83,7 +83,16 @@ router.post('/', (req, res) => {
         email: req.body.email,
         password: req.body.password
     })
-        .then(dbUserData => res.json(dbUserData))
+        .then(dbUserData => {
+            // We want to make sure the session is created before we send the response back, so we're wrapping the variables in a callback. The req.session.save() method will initiate the creation of the session and then run the callback function once complete.
+            req.session.save(() => {
+                req.session.user_id = dbUserData.id;
+                req.session.username = dbUserData.username;
+                req.session.loggedIn = true;
+
+                res.json(dbUserData);
+            });
+        })
         .catch(err => {
             console.log(err);
             res.status(500).json(err);
@@ -92,7 +101,7 @@ router.post('/', (req, res) => {
 
 // this route will be found at http://localhost:3001/api/users/login
 router.post('/login', (req, res) => {
-// expects {email: 'lernantino@gmail.com', password: 'password1234'}
+    // expects {email: 'lernantino@gmail.com', password: 'password1234'}
     User.findOne({
         where: {
             email: req.body.email
@@ -111,10 +120,28 @@ router.post('/login', (req, res) => {
             return;
         }
 
-        res.json({ user: dbUserData, message: 'You are now logged in!' })
-    })
+        req.session.save(() => {
+            // declare session variables
+            req.session.user_id = dbUserData.id;
+            req.session.username = dbUserData.username;
+            req.session.loggedIn = true;
 
-})
+            res.json({ user: dbUserData, message: 'You are now logged in!' })
+        });
+    });
+
+});
+
+router.post('/logout', (req, res) => {
+    if (req.session.loggedIn) {
+        req.session.destroy(() => {
+          res.status(204).end();
+        });
+      }
+      else {
+        res.status(404).end();
+      }
+});
 
 // ================================================================================================================================================================= //
 //| updates existing data, equivalent to SQL 'UPDATE users SET username = "Lernantino", email = "lernantino@gmail.com", password = "newPassword1234" WHERE id = 1;' |//
@@ -132,17 +159,17 @@ router.put('/:id', (req, res) => {
             id: req.params.id
         }
     })
-    .then(dbUserData => {
-        if (!dbUserData[0]) {
-            res.status(404).json({ message: 'No user found with this id' });
-            return;
-        }
-        res.json(dbUserData);
-    })
-    .catch(err => {
-        console.log(err);
-        res.status(500).json(err);
-    });
+        .then(dbUserData => {
+            if (!dbUserData[0]) {
+                res.status(404).json({ message: 'No user found with this id' });
+                return;
+            }
+            res.json(dbUserData);
+        })
+        .catch(err => {
+            console.log(err);
+            res.status(500).json(err);
+        });
 });
 
 
@@ -154,13 +181,13 @@ router.delete('/:id', (req, res) => {
             id: req.params.id
         }
     })
-    .then(dbUserData => {
-        if (!dbUserData) {
-            res.status(404).json({ message: 'No User found with this id' });
-            return;
-        }
-        res.json(dbUserData);
-    });
+        .then(dbUserData => {
+            if (!dbUserData) {
+                res.status(404).json({ message: 'No User found with this id' });
+                return;
+            }
+            res.json(dbUserData);
+        });
 });
 
 module.exports = router;

@@ -14,6 +14,13 @@
             <h1>
                 <a href="/">Just Tech News</a>
             </h1>
+            <nav>
+                {{#if loggedIn}}
+                <button id="logout" class="btn-no-style">logout</button>
+                {{else}}
+                <a href="/login">login</a>
+                {{/if}}
+            </nav>
         </header>
         <main>
             <!-- This is Handlebars.js syntax for data that will be plugged in later -->
@@ -23,6 +30,10 @@
             Thanks for visiting!
         </footer>
     </div>    
+
+    {{#if loggedIn}}
+    <script src="/javascript/logout.js"></script>
+    {{/if}}
 
 </body>
 
